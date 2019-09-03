@@ -1,19 +1,38 @@
 import { combineReducers } from "redux";
 import {
   ADD_LOCATION,
-  //   ADD_LOCATION_ERROR,
   REMOVE_LOCATION,
-  SELECT_DAY
-} from "../actions";
+  UPDATE_ORDER,
+  SEARCH_ERROR,
+  SELECT_DAY,
+  SEARCH_SUCCESS
+} from "./actions";
 
 function locations(state = [], action) {
   switch (action.type) {
     case ADD_LOCATION:
-      return [...state, { ...action.location }];
-    // case ADD_LOCATION_ERROR:
-    //   return { ...state, error: action.error };
+      const found = state.find(
+        location => location.zip === action.location.zip
+      );
+      if (!found) {
+        return [...state, { ...action.location }];
+      }
+      return state;
     case REMOVE_LOCATION:
       return state.filter(location => location.key !== action.key);
+    case UPDATE_ORDER:
+      return [...action.locations];
+    default:
+      return state;
+  }
+}
+
+function search(state = {}, action) {
+  switch (action.type) {
+    case SEARCH_SUCCESS:
+      return { ...state, error: action.error };
+    case SEARCH_ERROR:
+      return { ...state, error: action.error };
     default:
       return state;
   }
@@ -22,7 +41,6 @@ function locations(state = [], action) {
 function selectDay(state = {}, action) {
   switch (action.type) {
     case SELECT_DAY:
-      // can't destructure because state and location.state conflict
       const location = {
         city: action.location.city,
         state: action.location.state,
@@ -37,7 +55,8 @@ function selectDay(state = {}, action) {
 
 const rootReducer = combineReducers({
   locations,
-  selectDay
+  selectDay,
+  search
 });
 
 export default rootReducer;

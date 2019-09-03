@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_KEY } from "../config";
+import { API_KEY } from "../configs";
 
 export const zipLookup = async zipCode => {
   return await axios

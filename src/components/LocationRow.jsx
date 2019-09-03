@@ -1,54 +1,69 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import moment from "moment";
-import Day from "./Day";
+import { Draggable } from "react-beautiful-dnd";
+import styled from "styled-components";
 import { removeLocation, selectDay } from "../redux/actions";
+import { createUrl } from "../lib/helpers";
+import Day from "./Day";
+
+const Container = styled.div`
+  border: solid 1px grey;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background: white;
+`;
 
 class LocationRow extends Component {
-  _selectDay = (location, day) => {
+  selectDay = (location, day) => {
     this.props.selectDay(location, day);
   };
 
-  _removeLocation = key => {
+  removeLocation = key => {
     this.props.removeLocation(key);
   };
 
-  _handleClick = (location, day) => {
+  handleClick = (location, day) => {
     this.props.selectDay(location, day);
   };
 
   render() {
     const { city, state, fiveDay, key, zip } = this.props.location;
+    const { index } = this.props;
     return (
-      <div className="container" key={key}>
-        <div className="flex header">
-          <span className="location">
-            {city}, {state}
-          </span>
-          <button className="btn" onClick={() => this._removeLocation(key)}>
-            Remove
-          </button>
-        </div>
+      <Draggable draggableId={zip} index={index}>
+        {provided => (
+          <Container
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            ref={provided.innerRef}
+          >
+            <div className="flex header">
+              <span className="location">
+                {city}, {state}
+              </span>
+              <button className="btn" onClick={() => this.removeLocation(key)}>
+                Remove
+              </button>
+            </div>
 
-        <div className="flex">
-          {fiveDay.map((day, i) => {
-            const url = `/${zip}/${moment(day.Date)
-              .format("dddd")
-              .toLowerCase()}`;
-            return (
-              <Link
-                to={url}
-                key={day.EpochDate}
-                className="box"
-                onClick={() => this._handleClick(this.props.location, i)}
-              >
-                <Day day={day} />
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+            <div className="flex">
+              {fiveDay.map((day, i) => {
+                return (
+                  <Link
+                    to={createUrl(zip, day.Date)}
+                    key={day.EpochDate}
+                    className="box"
+                    onClick={() => this.handleClick(this.props.location, i)}
+                  >
+                    <Day day={day} />
+                  </Link>
+                );
+              })}
+            </div>
+          </Container>
+        )}
+      </Draggable>
     );
   }
 }
